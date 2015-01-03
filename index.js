@@ -34,38 +34,52 @@ Ajax.apex = function(method, name, params){
   return deferred.promise;
 }
 
-Ajax.query = function(params, options){
 
+Ajax.query = function(params, options){
+var _this = this;
   //var pctEncodeSpaces = true;
 //  var params = encodeURIComponent(params).replace(/%40/gi, '@').replace(/%3A/gi, ':').replace(/%24/g, '$').replace(/%2C/gi, ',').replace(/%20/g, pctEncodeSpaces ? '%20' : '+');
   
   var deferred = Q.defer();
-
+  
   Ajax.Request.get( Ajax.generateURL(this) )
   //.set('X-Ajax.Requested-With', true)
-  .query( "query", params )
+  .query( "query=" + params )
   .withCredentials()
   .end( function( err, res ){ 
     if( err ) return deferred.reject( err );
     
-    for (var i = res.length - 1; i >= 0; i--) {
-      //results[i].id = results[i].Id
-      //delete results[i].Id;
-    };
-    
-    deferred.resolve( res )
+    deferred.resolve( res.body )
   });
   return deferred.promise;
 
 }
 
+Ajax.login = function(id, options){
+  var _this = this;
+  var url =Ajax.host.replace("/api","")
+  var deferred = Q.defer();
+
+  Ajax.Request.get( url + "/login/whoami" )
+  .withCredentials()
+  .end( function( err, res ){ 
+    if( res.status != 200 ) window.location = url + "/login?app_url=" + window.location.href
+    Ajax.user = res.body;
+    deferred.resolve();
+  })
+  
+
+  return deferred.promise;
+}
+
 Ajax.get = function(id, options){
+  var _this = this;
   var deferred = Q.defer();
 
   Ajax.Request.get( Ajax.generateURL(this) + "/" + id )
   .end( function( err, res ){ 
     res.id = res.Id;
-    Ajax.handleResultWithPromise( err, res, false, deferred  );
+    Ajax.handleResultWithPromise.call(_this, err, res.body, false, deferred  );
   })
   
 
@@ -84,14 +98,16 @@ Ajax.post = function(model, options){
   .send( this.toJSON() )
   .withCredentials()
   .end( function( err, res ){ 
-    _this.id = id;
-    Ajax.handleResultWithPromise( err, res, false, deferred  )
+    _this.changeID(res.body.Id);
+    _this.Id = res.body.Id;
+    Ajax.handleResultWithPromise.call(_this, err, res.body, false, deferred  )
   });
 
   return deferred.promise;  
 }
 
 Ajax.put = function(model, options){
+  var _this = this;
   var deferred = Q.defer();
 
   var valuesToSend = JSON.parse(JSON.stringify(this.toJSON())); //ugly hack
@@ -106,19 +122,20 @@ Ajax.put = function(model, options){
   .send( valuesToSend )
   .withCredentials()
   .end( function( err, res ){ 
-    Ajax.handleResultWithPromise( err, res, true, deferred  )
+    Ajax.handleResultWithPromise.call(_this, err, res.body, true, deferred  )
   });
 
   return deferred.promise;  
 }
 
 Ajax.del = function(model, options){
+  var _this = this;
   var deferred = Q.defer();
 
   Ajax.Request.put( Ajax.generateURL(model, this.id ) )
   .withCredentials()
   .end( function( err, res ){ 
-    Ajax.handleResultWithPromise( err, res, true, deferred  )
+    Ajax.handleResultWithPromise.call(_this, err, res.body, true, deferred  )
   });
 
   return deferred.promise;  
@@ -139,18 +156,19 @@ Ajax.generateURL = function() {
 };
 
 Ajax.handleResultWithPromise = function(err, result, nullok, deferred) {
+  
   if(err) deferred.reject( err );
   else if (result) {
     if (typeof result !== 'object') {
       result = JSON.parse(result);
     }
     if (Array.isArray(result) && result.length > 0 && result[0].message && result[0].errorCode) {
-      deferred.reject(result);
-    } else {
-      deferred.resolve(result);
+      return deferred.reject(result);
+    } else {      
+      return deferred.resolve(this);
     }
   } else if (typeof nullok !== 'undefined' && nullok) {
-    deferred.resolve();
+    return deferred.resolve(this);
   } else {
     deferred.reject({
       message: 'Null returned by RemoteAction not called with nullOk flag',
