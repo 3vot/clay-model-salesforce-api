@@ -12,7 +12,8 @@ npm install clay-model-salesforce-api
 Clay-model-salesforce-api works in conjuntion with 3vot-salesforce-proxy, a proxy server that translates Salesforce REST into standard Rest API.
 
 You may use the 3VOT Heroku Button to deploy this server, use in your NODE Server or deploy a server yourself. 
-HEROKU BUTTON COMMING SOON
+[![Deploy](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy)
+
 https://github.com/3vot/3vot-salesforce-proxy
 
 # Usage
