@@ -1,23 +1,22 @@
 var test = require('tape');
 
 var Model = require("clay-model")
-var VFR = require("../")
-var ClayVFR = require("clay-vfr");
-var Visualforce = require("clay-vfr/test/mock/visualforce");
-ClayVFR.Visualforce = Visualforce;
+var VFR = require("../");
+
+var Mock = require("./mock/superagent");
+VFR.Request = Mock;
 
 test('Create Records', function (t) {
   t.plan(4);
   var Asset = Model.setup("Asset", ["name", "visible", "contact_methods"]);
   Asset.ajax = VFR;
 
-  Visualforce.nextReponse= function(method, params, callback){       
-    t.equal( params[0],"post" )
-    t.equal( params[1],"/Asset" )
-    var obj = JSON.parse( params[2] );
+  Mock.nextReponse= function(method, url, data, callback){       
+    t.equal( method,"post" )
+    t.equal( url,"/Asset" )
+    var obj = data;
     obj.id = 2;
-
-    callback( JSON.stringify(obj) );
+    callback( null, JSON.stringify(obj) );
   }
   
   var asset;
@@ -34,8 +33,8 @@ test('Create Records, with error in response', function (t) {
   var Asset = Model.setup("Asset", ["name", "visible", "contact_methods"]);
   Asset.ajax = VFR;
 
-  Visualforce.nextReponse= function(method, params, callback){       
-    callback(  );
+  Mock.nextReponse= function(method, url,data, callback){       
+    callback( "err" );
   }
   
   var asset;
@@ -43,15 +42,16 @@ test('Create Records, with error in response', function (t) {
   .fail(function(err){t.notEqual( err, null ) })
 })
 
+
 test('Update record', function (t) {
   t.plan(6);
   var Asset = Model.setup("Asset", ["name", "visible", "contact_methods"]);
   Asset.ajax = VFR;
 
-  Visualforce.nextReponse= function(method, params, callback){
-    t.equal( params[0],"put" )
-    t.equal( params[1],"/Asset/3" )    
-    callback();
+  Mock.nextReponse= function(method, url, data, callback){
+    t.equal( method,"put" )
+    t.equal( url,"/Asset/3" )    
+    callback(null,null);
   }
   
   var asset = Asset.create({ name: "test.pdf", id: 3 }, { ignoreAjax: true })
@@ -74,7 +74,7 @@ test('Destroy record', function (t) {
   var Asset = Model.setup("Asset", ["name", "visible", "contact_methods"]);
   Asset.ajax = VFR;
 
-  Visualforce.nextReponse= function(method, params, callback){
+  Mock.nextReponse= function(method, url, data, callback){
     callback();
   }
   
@@ -93,8 +93,8 @@ test('Read record', function (t) {
   var Asset = Model.setup("Asset", ["name", "visible", "contact_methods"]);
   Asset.ajax = VFR;
 
-  Visualforce.nextReponse= function(method, params, callback){
-    callback(JSON.stringify({name: "read name", visible: false}));
+  Mock.nextReponse= function(method, url, data, callback){
+    callback(null, JSON.stringify({name: "read name", visible: false}));
   }
   
   Asset.read(3)
@@ -109,8 +109,8 @@ test('Query record', function (t) {
   var Asset = Model.setup("Asset", ["name", "visible", "contact_methods"]);
   Asset.ajax = VFR;
 
-  Visualforce.nextReponse= function(method, params, callback){
-    callback(JSON.stringify([{name: "read query", visible: false},{name: "read query 2", visible: false}]));
+  Mock.nextReponse= function(method, url, data, callback){
+    callback(null, JSON.stringify([{name: "read query", visible: false},{name: "read query 2", visible: false}]));
   }
   
   Asset.query("select id,name from assets")

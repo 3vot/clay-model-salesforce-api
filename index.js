@@ -1,7 +1,8 @@
 var Q = require("kew");
 var Request = require("superagent")
-var Qs = require('qs');
-var QueryString = require("querystring");
+//var Qs = require('qs');
+//var QueryString = require("querystring");
+
 
 var Ajax = function(eventName, model, options){
   if(eventName == "create") return Ajax.post.call(this, model,options )
@@ -15,6 +16,8 @@ var Ajax = function(eventName, model, options){
   else if(eventName == "api") return Ajax.api.call(this, params, options);
 
 }
+
+Ajax.Request = Request;
 
 Ajax.host = "";
 
@@ -49,12 +52,10 @@ Ajax.query = function(params, options){
 //  var params = encodeURIComponent(params).replace(/%40/gi, '@').replace(/%3A/gi, ':').replace(/%24/g, '$').replace(/%2C/gi, ',').replace(/%20/g, pctEncodeSpaces ? '%20' : '+');
   
   var deferred = Q.defer();
-  //console.log(params)
-console.log(Qs.stringify( params ))
 
-  Request.get( Ajax.generateURL(this) )
-  //.set('X-Requested-With', true)
-  .query( "query", params );
+  Ajax.Request.get( Ajax.generateURL(this) )
+  //.set('X-Ajax.Requested-With', true)
+  .query( "query", params )
   .withCredentials()
   .end( function( err, res ){ 
     if( err ) return deferred.reject( err );
@@ -73,7 +74,7 @@ console.log(Qs.stringify( params ))
 Ajax.get = function(id, options){
   var deferred = Q.defer();
 
-  Request.get( Ajax.generateURL(this) + "/" + id )
+  Ajax.Request.get( Ajax.generateURL(this) + "/" + id )
   .end( function( err, res ){ 
     res.id = res.Id;
     Ajax.handleResultWithPromise( err, res, false, deferred  );
@@ -91,7 +92,7 @@ Ajax.post = function(model, options){
   var id = this.id;
   this.id = null;
 
-  Request.post( Ajax.generateURL(model) )
+  Ajax.Request.post( Ajax.generateURL(model) )
   .send( this.toJSON() )
   .withCredentials()
   .end( function( err, res ){ 
@@ -113,11 +114,10 @@ Ajax.put = function(model, options){
     }
   }
 
-  Request.put( Ajax.generateURL(model, this.id ) )
+  Ajax.Request.put( Ajax.generateURL(model, this.id ) )
   .send( valuesToSend )
   .withCredentials()
   .end( function( err, res ){ 
-    _this.Id = id;
     Ajax.handleResultWithPromise( err, res, true, deferred  )
   });
 
@@ -127,7 +127,7 @@ Ajax.put = function(model, options){
 Ajax.del = function(model, options){
   var deferred = Q.defer();
 
-  Request.put( Ajax.generateURL(model, this.id ) )
+  Ajax.Request.put( Ajax.generateURL(model, this.id ) )
   .withCredentials()
   .end( function( err, res ){ 
     Ajax.handleResultWithPromise( err, res, true, deferred  )
@@ -172,4 +172,3 @@ Ajax.handleResultWithPromise = function(err, result, nullok, deferred) {
 }
 
 module.exports = Ajax;
-
