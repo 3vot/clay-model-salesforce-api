@@ -9,11 +9,9 @@ var Ajax = function(eventName, model, options){
   else if(eventName == "update") return Ajax.put.call(this, model,options )
   else if(eventName == "destroy") return Ajax.del.call(this, model,options )
   
-  //Sho
   var params = model;
   if(eventName == "query") return Ajax.query.call(this, params, options);  
   else if(eventName == "read") return Ajax.get.call(this, params, options);
-  else if(eventName == "api") return Ajax.api.call(this, params, options);
 
 }
 
@@ -21,29 +19,19 @@ Ajax.Request = Request;
 
 Ajax.host = "";
 
-Ajax.vfr = function(remoteAction, options){
-  if(typeof remoteAction != "string" ) throw "First Argument should be the Remote Action (string)"
-  if(!options) options = { escape: false  };
+
+Ajax.apex = function(method, name, params){
   
+  var deferred = Q.defer();
 
-  var send = VFR( remoteAction, options, options.nullok || false );
-  return send
-}
-
-Ajax.api = function(){
-  if(!this.ajax.namespace) this.ajax.namespace = ""
-  var remoteAction = arguments[0];
-  
-  var callArgs = []
-  for (var i = 1; i < arguments.length-1; i++) {
-    callArgs.push(args[i]);
-  };
-  options = arguments[arguments.length-1];
-  if(typeof remoteAction != "string" ) throw "First Argument should be the Remote Action (string)"
-  if(options == remoteAction) options = {};
-
-  var send = VFR( this.ajax.namespace + remoteAction, options, options.nullok || false );
-  return send.apply( VFR, JSON.stringify(this.toJSON()) );
+  Ajax.Request[method]( Ajax.host + "/apex/" + name )
+  .send(params)
+  .withCredentials()
+  .end( function( err, res ){ 
+    if( err ) return deferred.reject( err );
+    deferred.resolve( res )
+  });
+  return deferred.promise;
 }
 
 Ajax.query = function(params, options){

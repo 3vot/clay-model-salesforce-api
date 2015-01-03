@@ -1,25 +1,30 @@
-clay-model-vfr
+clay-model-salesforce-api
 ==============
 
-Clay Visualforce Connector for Clay-Model
+Clay REST API Connector for Clay-Model
 
-# Dependencies
-
-clay-model-vfr uses Clay for Salesforce Package Available in App Exchange. There is a package that works with RemoteTK Component.
 
 # Install
-npm install clay-model-vfr
+npm install clay-model-salesforce-api
+
+# Overview
+
+Clay-model-salesforce-api works in conjuntion with 3vot-salesforce-proxy, a proxy server that translates Salesforce REST into standard Rest API.
+
+You may use the 3VOT Heroku Button to deploy this server, use in your NODE Server or deploy a server yourself. 
+HEROKU BUTTON COMMING SOON
+https://github.com/3vot/3vot-salesforce-proxy
 
 # Usage
 
 Register this Connector with Clay-Model at initialization
 
 ```
-var ClayVfr = require("clay-model-vfr");
+var Ajax = require("clay-model-salesforce-api");
 
 var Model = require("clay-model");
 var User = Model.configure("User", ["name", "email"])
-User.ajax = ClayVfr;
+User.ajax = Ajax;
 ```
 
 # Docs
@@ -40,47 +45,28 @@ User.query( SOQL )
 ## CRUD
 Use Clay-Model regularly, behind the scenes it is sending all CRUD's to Salesforce.com via Visualforce Remoting
 
-Only thing to note, if you don't want to send changes to the servers, use { ignoreAjax: true }
+```
+var user = User.create({name: "rob"})
+user.save();
+user.destroy();
+
+Only important feature to note, if you don't want to send changes to the servers, use { ignoreAjax: true }
 
 ```
 var user = User.create({name: "rob"}, {ignoreAjax: true})
 user.save({ ignoreAjax: true });
 user.destroy({ignoreAjax});
 ```
-## Visualforce Remoting
 
-Because sometimes is useful to wrap Visualforce Remoting Calls inside a Model, we included the Api Method.
+## APEX
+Clay-Model let's you make Apex Rest Calls
 
 ```
-User.api( remoteAction, argument1, argument2, argumentn,  options );
+var Ajax = require("clay-model-salesforce-api");
+Ajax.apex( "post", "postMethod", { id: 1, name: "value", other: false }  )
+.then( ... )
+.fail( ... )
 
-remoteAction: [STRING] The remote action you want to execute in the form ClassName.MethodName
+For get requests with query strings, attach the string to the postMethod as in getMethod?query=yes&other=true
 
-arguments: optional arguments to be send to RemoteAction.
-
-options: [OBJECT] Options for Visualforce Remoting Configuration
-
-options.nullok: [BOOLEAN] Don't raise error if VFR response is null. Default: false -> will raise error is response is null
-
-## Packages for ISV's
-
-When the app is part of a package simple add the following line
-```
-User.ajax.namespace = "NAMESPACE.";
-```
-This must be done for each model. Notice the (.) at the end of the namespace, it is required.
-
-## Clay for Salesforce
-
-To use Clay-Model-VFR with Clay for Salesforce the namespaces work as follows:
-
-[https://appexchange.salesforce.com/listingDetail?listingId=a0N3000000B5XIMEA3]( App Exachange Instalation ) NAMESPACE = threevot.ThreeVotApiController
-
-[https://login.salesforce.com/packaging/installPackage.apexp?p0=04ti0000000XxBH]( Manual Instalation - No Updates ) ThreevotApiController
-
-[https://github.com/3vot/clayforsalesforce]( Open Source ) ThreevotApiController or you Package if using in Managed Package 
-
-
-
-
-
+Remember http rest method is delete.
