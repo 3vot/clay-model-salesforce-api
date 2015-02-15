@@ -1,6 +1,6 @@
 {
   "name": "clay-model-salesforce-api",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Clay Model Connector for Salesforce API, using 3VOT Salesforce Proxy",
   "main": "index.js",
   "scripts": {
@@ -15,7 +15,7 @@
   },
   "license": "BSD-2-Clause",
   "dependencies": {
-    "clay-model": "0.0.4",
+    "clay-model": "0.0.6",
     "superagent": "~0.21.0",
     "kew": "~0.5.0-alpha.1"
   },

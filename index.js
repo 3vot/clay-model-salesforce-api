@@ -63,7 +63,7 @@ Ajax.login = function(id, options){
   Ajax.Request.get( url + "/login/whoami" )
   .withCredentials()
   .end( function( err, res ){ 
-    if( res.status != 200 ) window.location = url + "/login?app_url=" + window.location.href
+    if( err || res.status != 200 ) return window.location = url + "/login?app_url=" + window.location.href
     Ajax.user = res.body;
     deferred.resolve();
   })
