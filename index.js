@@ -45,6 +45,7 @@ var _this = this;
   Ajax.Request.get( Ajax.generateURL(this) )
   //.set('X-Ajax.Requested-With', true)
   .query( "query=" + params )
+  .query( options )
   .withCredentials()
   .end( function( err, res ){ 
     if( err ) return deferred.reject( err );
