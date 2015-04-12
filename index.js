@@ -49,7 +49,12 @@ var _this = this;
   .withCredentials()
   .end( function( err, res ){ 
     if( err ) return deferred.reject( err );
-    
+
+    for (var i = res.body.length - 1; i >= 0; i--) {
+      var item = res.body[i];
+      item.id = item.Id;
+    };
+
     deferred.resolve( res.body )
   });
   return deferred.promise;
