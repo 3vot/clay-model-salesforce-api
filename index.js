@@ -104,8 +104,12 @@ Ajax.post = function(model, options){
   .send( this.toJSON() )
   .withCredentials()
   .end( function( err, res ){ 
+    console.log(res.body.Id)
+    console.log(_this)
+    _this.id = res.body.Id;
     _this.changeID(res.body.Id);
     _this.Id = res.body.Id;
+
     Ajax.handleResultWithPromise.call(_this, err, res.body, false, deferred  )
   });
 
