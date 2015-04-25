@@ -35,6 +35,22 @@ Ajax.apex = function(method, name, params){
 }
 
 
+Ajax.push = function(options){
+  var _this = this;
+  var url =Ajax.host.replace("/api","")
+  var deferred = Q.defer();
+
+  Ajax.Request.get( url + "/pusher" )
+  .withCredentials()
+  .query( options )
+  .end( function( err, res ){ 
+    console.log(res);
+  })
+  
+
+  return deferred.promise;
+}
+
 Ajax.query = function(params, options){
 var _this = this;
   //var pctEncodeSpaces = true;
