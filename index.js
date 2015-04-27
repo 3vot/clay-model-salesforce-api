@@ -12,6 +12,8 @@ var Ajax = function(eventName, model, options){
   var params = model;
   if(eventName == "query") return Ajax.query.call(this, params, options);  
   else if(eventName == "read") return Ajax.get.call(this, params, options);
+  else if(eventName == "pull") return Ajax.pull.call(this, params);  
+  else if(eventName == "push") return Ajax.push.call(this, params);  
 
 }
 
@@ -35,22 +37,6 @@ Ajax.apex = function(method, name, params){
 }
 
 
-Ajax.push = function(options){
-  var _this = this;
-  var url =Ajax.host.replace("/api","")
-  var deferred = Q.defer();
-
-  Ajax.Request.get( url + "/pusher" )
-  .withCredentials()
-  .query( options )
-  .end( function( err, res ){ 
-    console.log(res);
-  })
-  
-
-  return deferred.promise;
-}
-
 Ajax.query = function(params, options){
 var _this = this;
   //var pctEncodeSpaces = true;
@@ -65,33 +51,73 @@ var _this = this;
   .withCredentials()
   .end( function( err, res ){ 
     if( err ) return deferred.reject( err );
-
     for (var i = res.body.length - 1; i >= 0; i--) {
       var item = res.body[i];
       item.id = item.Id;
     };
-
+    
     deferred.resolve( res.body )
   });
   return deferred.promise;
 
 }
 
-Ajax.login = function(id, options){
+Ajax.login = function(options){
   var _this = this;
   var url =Ajax.host.replace("/api","")
   var deferred = Q.defer();
 
   Ajax.Request.get( url + "/login/whoami" )
   .withCredentials()
+  .query( options )
   .end( function( err, res ){ 
     if( err || res.status != 200 ) return window.location = url + "/login?app_url=" + window.location.href
     Ajax.user = res.body;
     deferred.resolve();
   })
   
-
   return deferred.promise;
+}
+
+Ajax.push = function(options){
+  var _this = this;
+  var url =Ajax.host.replace("/api","")
+  var deferred = Q.defer();
+
+  if(options.channel) channel = this.className + "_" + options.channel;
+  else options.channel = this.className
+
+  options.socket_id = Ajax.pusher.connection.socket_id;
+
+  Ajax.Request.get( url + "/pusher" )
+  .withCredentials()
+  .query( options )
+  .end( function( err, res ){ 
+    if(err) deferred.reject(err);
+    deferred.resolve(res);
+  })
+  
+  return deferred.promise;
+}
+
+Ajax.pull = function(options){
+  var _this = this;
+  if( !Ajax.pusher ) throw "Remember to register. Ajax.pusher = var pusher = new Pusher('KEY');"
+  var channel = Ajax.pusher.subscribe( this.className );
+  if(options.channel) channel += "_" + options.channel;
+
+  channel.bind( options.eventName, function(data) {
+    
+    _this.trigger(options.eventName, JSON.parse( data.message ) );
+  });
+}
+
+Ajax.realtime = function(){
+  Ajax.realtime = true;
+
+  this.pull( { eventName: "create" } )
+  this.pull( { eventName: "update" } )
+  this.pull( { eventName: "destroy" } )
 }
 
 Ajax.get = function(id, options){
@@ -103,7 +129,6 @@ Ajax.get = function(id, options){
     res.id = res.Id;
     Ajax.handleResultWithPromise.call(_this, err, res.body, false, deferred  );
   })
-  
 
   return deferred.promise;
 }
