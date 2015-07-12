@@ -15,7 +15,7 @@
   },
   "license": "BSD-2-Clause",
   "dependencies": {
-    "clay-model": "0.0.8",
+    "clay-model": "0.0.9",
     "superagent": "~0.21.0",
     "kew": "~0.5.0-alpha.1"
   },
