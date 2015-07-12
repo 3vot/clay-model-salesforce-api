@@ -53,6 +53,8 @@ var _this = this;
   .withCredentials()
   .end( function( err, res ){ 
     if( err ) return deferred.reject( err );
+    if(res.status >= 400) return deferred.reject( res.body );
+
     for (var i = res.body.length - 1; i >= 0; i--) {
       var item = res.body[i];
       item.id = item.Id;
@@ -99,6 +101,7 @@ Ajax.push = function(options){
   .query("login_server=" +Ajax.login_server)
   .end( function( err, res ){ 
     if(err) deferred.reject(err);
+    if(res.status >= 400) return deferred.reject( res.body );
     deferred.resolve(res);
   })
   
@@ -132,6 +135,8 @@ Ajax.get = function(id, options){
   Ajax.Request.get( Ajax.generateURL(this) + "/" + id )
   .query("login_server=" +Ajax.login_server)
   .end( function( err, res ){ 
+    if(err) return deferred.reject( err );
+    if(res.status >= 400) return deferred.reject( res.body );
     res.id = res.Id;
     Ajax.handleResultWithPromise.call(_this, err, res.body, false, deferred  );
   })
@@ -152,10 +157,13 @@ Ajax.post = function(model, options){
   .send( this.toJSON() )
   .withCredentials()
   .end( function( err, res ){ 
+    if(err){ _this.id = id; return deferred.reject( err ); }
+    if(res.status >= 400){ _this.id = id; return deferred.reject( res.body ); }
+    
     _this.id = res.body.Id;
     _this.changeID(res.body.Id);
     _this.Id = res.body.Id;
-
+    if(res.status >= 400) return deferred.reject( res.body );
     Ajax.handleResultWithPromise.call(_this, err, res.body, false, deferred  )
   });
 
@@ -182,6 +190,8 @@ Ajax.put = function(model, options){
   .send( valuesToSend )
   .withCredentials()
   .end( function( err, res ){ 
+    if(err) return deferred.reject( err );
+    if(res.status >= 400) return deferred.reject( res.body );
     Ajax.handleResultWithPromise.call(_this, err, res.body, true, deferred  )
   });
 
@@ -196,6 +206,8 @@ Ajax.del = function(model, options){
   .query("login_server=" +Ajax.login_server)
   .withCredentials()
   .end( function( err, res ){ 
+    if(err) return deferred.reject( err );
+    if(res.status >= 400) return deferred.reject( res.body );
     Ajax.handleResultWithPromise.call(_this, err, res.body, true, deferred  )
   });
 
@@ -217,9 +229,7 @@ Ajax.generateURL = function() {
 };
 
 Ajax.handleResultWithPromise = function(err, result, nullok, deferred) {
-  
-  if(err) deferred.reject( err );
-  else if (result) {
+  if (result) {
     if (typeof result !== 'object') {
       result = JSON.parse(result);
     }
