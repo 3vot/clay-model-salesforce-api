@@ -20,13 +20,14 @@ var Ajax = function(eventName, model, options){
 Ajax.Request = Request;
 
 Ajax.host = "";
-
+Ajax.login_server = "login.salesforce.com"
 
 Ajax.apex = function(method, name, params){
   
   var deferred = Q.defer();
 
-  Ajax.Request[method]( Ajax.host + "/apex/" + name )
+  Ajax.Request[method]( Ajax.host + "/apex/" + name  )
+  .query("login_server=" +Ajax.login_server)
   .send(params)
   .withCredentials()
   .end( function( err, res ){ 
@@ -44,10 +45,11 @@ var _this = this;
   
   var deferred = Q.defer();
   
+
   Ajax.Request.get( Ajax.generateURL(this) )
-  //.set('X-Ajax.Requested-With', true)
   .query( "query=" + params )
   .query( options )
+  .query("login_server=" +Ajax.login_server)
   .withCredentials()
   .end( function( err, res ){ 
     if( err ) return deferred.reject( err );
@@ -63,15 +65,17 @@ var _this = this;
 }
 
 Ajax.login = function(options){
+  if(!options) options = {};
   var _this = this;
   var url =Ajax.host.replace("/api","")
   var deferred = Q.defer();
 
-  Ajax.Request.get( url + "/login/whoami" )
+  Ajax.Request.get( url + "/login/whoami")
   .withCredentials()
   .query( options )
+  .query("login_server=" +Ajax.login_server)
   .end( function( err, res ){ 
-    if( err || res.status != 200 ) return window.location = url + "/login?app_url=" + window.location.href
+    if( err || res.status != 200 ) return window.location = url + "/login?app_url=" + window.location.href + "&login_server=" + Ajax.login_server ;
     Ajax.user = res.body;
     deferred.resolve();
   })
@@ -92,6 +96,7 @@ Ajax.push = function(options){
   Ajax.Request.get( url + "/pusher" )
   .withCredentials()
   .query( options )
+  .query("login_server=" +Ajax.login_server)
   .end( function( err, res ){ 
     if(err) deferred.reject(err);
     deferred.resolve(res);
@@ -125,6 +130,7 @@ Ajax.get = function(id, options){
   var deferred = Q.defer();
 
   Ajax.Request.get( Ajax.generateURL(this) + "/" + id )
+  .query("login_server=" +Ajax.login_server)
   .end( function( err, res ){ 
     res.id = res.Id;
     Ajax.handleResultWithPromise.call(_this, err, res.body, false, deferred  );
@@ -142,11 +148,10 @@ Ajax.post = function(model, options){
   this.id = null;
 
   Ajax.Request.post( Ajax.generateURL(model) )
+  .query("login_server=" +Ajax.login_server)
   .send( this.toJSON() )
   .withCredentials()
   .end( function( err, res ){ 
-    console.log(res.body.Id)
-    console.log(_this)
     _this.id = res.body.Id;
     _this.changeID(res.body.Id);
     _this.Id = res.body.Id;
@@ -164,12 +169,16 @@ Ajax.put = function(model, options){
   var valuesToSend = JSON.parse(JSON.stringify(this.toJSON())); //ugly hack
   var previousAttributes = JSON.parse( model.previousAttributes[this.id] );
   for(key in valuesToSend){
-    if(valuesToSend[key] == previousAttributes[key]){
+    if( this.constructor.ignoreFields && this.constructor.ignoreFields.indexOf(key) > -1 ) delete valuesToSend[key];
+
+    
+    else if(valuesToSend[key] == previousAttributes[key]){
       delete valuesToSend[key];
     }
   }
 
   Ajax.Request.put( Ajax.generateURL(model, this.id ) )
+  .query("login_server=" +Ajax.login_server)
   .send( valuesToSend )
   .withCredentials()
   .end( function( err, res ){ 
@@ -184,6 +193,7 @@ Ajax.del = function(model, options){
   var deferred = Q.defer();
 
   Ajax.Request.put( Ajax.generateURL(model, this.id ) )
+  .query("login_server=" +Ajax.login_server)
   .withCredentials()
   .end( function( err, res ){ 
     Ajax.handleResultWithPromise.call(_this, err, res.body, true, deferred  )
