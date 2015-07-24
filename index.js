@@ -31,6 +31,7 @@ Ajax.apex = function(method, name, params){
   .send(params)
   .withCredentials()
   .end( function( err, res ){ 
+    if( navigator.onLine || window.simulateOffline ) return deferred.reject("NO_INTERNET")
     if( err ) return deferred.reject( err );
     deferred.resolve( res )
   });
@@ -51,7 +52,8 @@ var _this = this;
   .query( options )
   .query("login_server=" +Ajax.login_server)
   .withCredentials()
-  .end( function( err, res ){ 
+  .end( function( err, res ){
+    if( navigator.onLine || window.simulateOffline ) return deferred.reject("NO_INTERNET")
     if( err ) return deferred.reject( err );
     if(res.status >= 400) return deferred.reject( res.body );
 
@@ -77,6 +79,7 @@ Ajax.login = function(options){
   .query( options )
   .query("login_server=" +Ajax.login_server)
   .end( function( err, res ){ 
+    if( navigator.onLine || window.simulateOffline ) return deferred.reject("NO_INTERNET")
     if( err || res.status != 200 ) return window.location = url + "/login?app_url=" + window.location.href + "&login_server=" + Ajax.login_server ;
     Ajax.user = res.body;
     deferred.resolve();
@@ -100,6 +103,7 @@ Ajax.push = function(options){
   .query( options )
   .query("login_server=" +Ajax.login_server)
   .end( function( err, res ){ 
+    if( navigator.onLine || window.simulateOffline ) return deferred.reject("NO_INTERNET")
     if(err) deferred.reject(err);
     if(res.status >= 400) return deferred.reject( res.body );
     deferred.resolve(res);
@@ -135,6 +139,7 @@ Ajax.get = function(id, options){
   Ajax.Request.get( Ajax.generateURL(this) + "/" + id )
   .query("login_server=" +Ajax.login_server)
   .end( function( err, res ){ 
+    if( navigator.onLine || window.simulateOffline ) return deferred.reject("NO_INTERNET")
     if(err) return deferred.reject( err );
     if(res.status >= 400) return deferred.reject( res.body );
     res.id = res.Id;
@@ -157,6 +162,7 @@ Ajax.post = function(model, options){
   .send( this.toJSON() )
   .withCredentials()
   .end( function( err, res ){ 
+    if( navigator.onLine || window.simulateOffline ) return deferred.reject("NO_INTERNET")
     if(err){ _this.id = id; return deferred.reject( err ); }
     if(res.status >= 400){ _this.id = id; return deferred.reject( res.body ); }
     
@@ -190,6 +196,7 @@ Ajax.put = function(model, options){
   .send( valuesToSend )
   .withCredentials()
   .end( function( err, res ){ 
+    if( navigator.onLine || window.simulateOffline ) return deferred.reject("NO_INTERNET")
     if(err) return deferred.reject( err );
     if(res.status >= 400) return deferred.reject( res.body );
     Ajax.handleResultWithPromise.call(_this, err, res.body, true, deferred  )
@@ -206,6 +213,7 @@ Ajax.del = function(model, options){
   .query("login_server=" +Ajax.login_server)
   .withCredentials()
   .end( function( err, res ){ 
+    if( navigator.onLine || window.simulateOffline ) return deferred.reject("NO_INTERNET")
     if(err) return deferred.reject( err );
     if(res.status >= 400) return deferred.reject( res.body );
     Ajax.handleResultWithPromise.call(_this, err, res.body, true, deferred  )
