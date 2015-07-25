@@ -1,0 +1,115 @@
+0 info it worked if it ends with ok
+1 verbose cli [ '/Users/roberto/.nvm/v0.10.21/bin/node',
+1 verbose cli   '/Users/roberto/.nvm/v0.10.21/bin/npm',
+1 verbose cli   'publish' ]
+2 info using npm@1.3.11
+3 info using node@v0.10.21
+4 verbose publish [ '.' ]
+5 verbose cache add [ '.', null ]
+6 verbose cache add name=undefined spec="." args=[".",null]
+7 verbose parsed url { protocol: null,
+7 verbose parsed url   slashes: null,
+7 verbose parsed url   auth: null,
+7 verbose parsed url   host: null,
+7 verbose parsed url   port: null,
+7 verbose parsed url   hostname: null,
+7 verbose parsed url   hash: null,
+7 verbose parsed url   search: null,
+7 verbose parsed url   query: null,
+7 verbose parsed url   pathname: '.',
+7 verbose parsed url   path: '.',
+7 verbose parsed url   href: '.' }
+8 silly lockFile 3a52ce78- .
+9 verbose lock . /Users/roberto/.npm/3a52ce78-.lock
+10 verbose tar pack [ '/var/folders/jh/r3qc2ygs48lg96lpbt769fs00000gn/T/npm-68773-VCbwdLJp/1437839483948-0.3234847818966955/tmp.tgz',
+10 verbose tar pack   '.' ]
+11 verbose tarball /var/folders/jh/r3qc2ygs48lg96lpbt769fs00000gn/T/npm-68773-VCbwdLJp/1437839483948-0.3234847818966955/tmp.tgz
+12 verbose folder .
+13 silly lockFile 1f1177db-tar tar://.
+14 verbose lock tar://. /Users/roberto/.npm/1f1177db-tar.lock
+15 silly lockFile 3b6f1a84-83948-0-3234847818966955-tmp-tgz tar:///var/folders/jh/r3qc2ygs48lg96lpbt769fs00000gn/T/npm-68773-VCbwdLJp/1437839483948-0.3234847818966955/tmp.tgz
+16 verbose lock tar:///var/folders/jh/r3qc2ygs48lg96lpbt769fs00000gn/T/npm-68773-VCbwdLJp/1437839483948-0.3234847818966955/tmp.tgz /Users/roberto/.npm/3b6f1a84-83948-0-3234847818966955-tmp-tgz.lock
+17 silly lockFile 1f1177db-tar tar://.
+18 silly lockFile 1f1177db-tar tar://.
+19 silly lockFile 3b6f1a84-83948-0-3234847818966955-tmp-tgz tar:///var/folders/jh/r3qc2ygs48lg96lpbt769fs00000gn/T/npm-68773-VCbwdLJp/1437839483948-0.3234847818966955/tmp.tgz
+20 silly lockFile 3b6f1a84-83948-0-3234847818966955-tmp-tgz tar:///var/folders/jh/r3qc2ygs48lg96lpbt769fs00000gn/T/npm-68773-VCbwdLJp/1437839483948-0.3234847818966955/tmp.tgz
+21 verbose tar unpack /var/folders/jh/r3qc2ygs48lg96lpbt769fs00000gn/T/npm-68773-VCbwdLJp/1437839483948-0.3234847818966955/tmp.tgz
+22 silly lockFile a7beab0b-83948-0-3234847818966955-package tar:///var/folders/jh/r3qc2ygs48lg96lpbt769fs00000gn/T/npm-68773-VCbwdLJp/1437839483948-0.3234847818966955/package
+23 verbose lock tar:///var/folders/jh/r3qc2ygs48lg96lpbt769fs00000gn/T/npm-68773-VCbwdLJp/1437839483948-0.3234847818966955/package /Users/roberto/.npm/a7beab0b-83948-0-3234847818966955-package.lock
+24 silly lockFile 3b6f1a84-83948-0-3234847818966955-tmp-tgz tar:///var/folders/jh/r3qc2ygs48lg96lpbt769fs00000gn/T/npm-68773-VCbwdLJp/1437839483948-0.3234847818966955/tmp.tgz
+25 verbose lock tar:///var/folders/jh/r3qc2ygs48lg96lpbt769fs00000gn/T/npm-68773-VCbwdLJp/1437839483948-0.3234847818966955/tmp.tgz /Users/roberto/.npm/3b6f1a84-83948-0-3234847818966955-tmp-tgz.lock
+26 silly gunzTarPerm modes [ '755', '644' ]
+27 silly gunzTarPerm extractEntry package.json
+28 silly gunzTarPerm extractEntry .npmignore
+29 silly gunzTarPerm extractEntry README.md
+30 silly gunzTarPerm extractEntry LICENSE
+31 silly gunzTarPerm extractEntry index.js
+32 silly lockFile a7beab0b-83948-0-3234847818966955-package tar:///var/folders/jh/r3qc2ygs48lg96lpbt769fs00000gn/T/npm-68773-VCbwdLJp/1437839483948-0.3234847818966955/package
+33 silly lockFile a7beab0b-83948-0-3234847818966955-package tar:///var/folders/jh/r3qc2ygs48lg96lpbt769fs00000gn/T/npm-68773-VCbwdLJp/1437839483948-0.3234847818966955/package
+34 silly lockFile 3b6f1a84-83948-0-3234847818966955-tmp-tgz tar:///var/folders/jh/r3qc2ygs48lg96lpbt769fs00000gn/T/npm-68773-VCbwdLJp/1437839483948-0.3234847818966955/tmp.tgz
+35 silly lockFile 3b6f1a84-83948-0-3234847818966955-tmp-tgz tar:///var/folders/jh/r3qc2ygs48lg96lpbt769fs00000gn/T/npm-68773-VCbwdLJp/1437839483948-0.3234847818966955/tmp.tgz
+36 verbose tar pack [ '/Users/roberto/.npm/clay-model-salesforce-api/0.0.11/package.tgz',
+36 verbose tar pack   '/var/folders/jh/r3qc2ygs48lg96lpbt769fs00000gn/T/npm-68773-VCbwdLJp/1437839483948-0.3234847818966955/package' ]
+37 verbose tarball /Users/roberto/.npm/clay-model-salesforce-api/0.0.11/package.tgz
+38 verbose folder /var/folders/jh/r3qc2ygs48lg96lpbt769fs00000gn/T/npm-68773-VCbwdLJp/1437839483948-0.3234847818966955/package
+39 silly lockFile a7beab0b-83948-0-3234847818966955-package tar:///var/folders/jh/r3qc2ygs48lg96lpbt769fs00000gn/T/npm-68773-VCbwdLJp/1437839483948-0.3234847818966955/package
+40 verbose lock tar:///var/folders/jh/r3qc2ygs48lg96lpbt769fs00000gn/T/npm-68773-VCbwdLJp/1437839483948-0.3234847818966955/package /Users/roberto/.npm/a7beab0b-83948-0-3234847818966955-package.lock
+41 silly lockFile 8da5aabc-alesforce-api-0-0-11-package-tgz tar:///Users/roberto/.npm/clay-model-salesforce-api/0.0.11/package.tgz
+42 verbose lock tar:///Users/roberto/.npm/clay-model-salesforce-api/0.0.11/package.tgz /Users/roberto/.npm/8da5aabc-alesforce-api-0-0-11-package-tgz.lock
+43 silly lockFile a7beab0b-83948-0-3234847818966955-package tar:///var/folders/jh/r3qc2ygs48lg96lpbt769fs00000gn/T/npm-68773-VCbwdLJp/1437839483948-0.3234847818966955/package
+44 silly lockFile a7beab0b-83948-0-3234847818966955-package tar:///var/folders/jh/r3qc2ygs48lg96lpbt769fs00000gn/T/npm-68773-VCbwdLJp/1437839483948-0.3234847818966955/package
+45 silly lockFile 8da5aabc-alesforce-api-0-0-11-package-tgz tar:///Users/roberto/.npm/clay-model-salesforce-api/0.0.11/package.tgz
+46 silly lockFile 8da5aabc-alesforce-api-0-0-11-package-tgz tar:///Users/roberto/.npm/clay-model-salesforce-api/0.0.11/package.tgz
+47 silly lockFile eb851386-el-salesforce-api-0-0-11-package /Users/roberto/.npm/clay-model-salesforce-api/0.0.11/package
+48 verbose lock /Users/roberto/.npm/clay-model-salesforce-api/0.0.11/package /Users/roberto/.npm/eb851386-el-salesforce-api-0-0-11-package.lock
+49 silly lockFile eb851386-el-salesforce-api-0-0-11-package /Users/roberto/.npm/clay-model-salesforce-api/0.0.11/package
+50 silly lockFile eb851386-el-salesforce-api-0-0-11-package /Users/roberto/.npm/clay-model-salesforce-api/0.0.11/package
+51 verbose tar unpack /Users/roberto/.npm/clay-model-salesforce-api/0.0.11/package.tgz
+52 silly lockFile 3f6b80d3-el-salesforce-api-0-0-11-package tar:///Users/roberto/.npm/clay-model-salesforce-api/0.0.11/package
+53 verbose lock tar:///Users/roberto/.npm/clay-model-salesforce-api/0.0.11/package /Users/roberto/.npm/3f6b80d3-el-salesforce-api-0-0-11-package.lock
+54 silly lockFile 8da5aabc-alesforce-api-0-0-11-package-tgz tar:///Users/roberto/.npm/clay-model-salesforce-api/0.0.11/package.tgz
+55 verbose lock tar:///Users/roberto/.npm/clay-model-salesforce-api/0.0.11/package.tgz /Users/roberto/.npm/8da5aabc-alesforce-api-0-0-11-package-tgz.lock
+56 silly gunzTarPerm modes [ '755', '644' ]
+57 silly gunzTarPerm extractEntry package.json
+58 silly gunzTarPerm extractEntry .npmignore
+59 silly gunzTarPerm extractEntry README.md
+60 silly gunzTarPerm extractEntry LICENSE
+61 silly gunzTarPerm extractEntry index.js
+62 silly lockFile 3f6b80d3-el-salesforce-api-0-0-11-package tar:///Users/roberto/.npm/clay-model-salesforce-api/0.0.11/package
+63 silly lockFile 3f6b80d3-el-salesforce-api-0-0-11-package tar:///Users/roberto/.npm/clay-model-salesforce-api/0.0.11/package
+64 silly lockFile 8da5aabc-alesforce-api-0-0-11-package-tgz tar:///Users/roberto/.npm/clay-model-salesforce-api/0.0.11/package.tgz
+65 silly lockFile 8da5aabc-alesforce-api-0-0-11-package-tgz tar:///Users/roberto/.npm/clay-model-salesforce-api/0.0.11/package.tgz
+66 verbose chmod /Users/roberto/.npm/clay-model-salesforce-api/0.0.11/package.tgz 644
+67 verbose chown /Users/roberto/.npm/clay-model-salesforce-api/0.0.11/package.tgz [ 501, 20 ]
+68 silly lockFile 3a52ce78- .
+69 silly lockFile 3a52ce78- .
+70 silly publish { name: 'clay-model-salesforce-api',
+70 silly publish   version: '0.0.11',
+70 silly publish   description: 'Clay Model Connector for Salesforce API, using 3VOT Salesforce Proxy',
+70 silly publish   main: 'index.js',
+70 silly publish   scripts: { test: 'tape ./test/index.js' },
+70 silly publish   author: { name: 'roberto@rodriguezartavia.com' },
+70 silly publish   repository:
+70 silly publish    { type: 'git',
+70 silly publish      url: 'https://github.com/3vot/clay-model-salesforce-api' },
+70 silly publish   license: 'BSD-2-Clause',
+70 silly publish   dependencies:
+70 silly publish    { 'clay-model': '0.0.9',
+70 silly publish      superagent: '~0.21.0',
+70 silly publish      kew: '~0.5.0-alpha.1' },
+70 silly publish   devDependencies: { tape: '~2.4.0' },
+70 silly publish   readmeFilename: 'README.md',
+70 silly publish   bugs: { url: 'https://github.com/3vot/clay-model-salesforce-api/issues' },
+70 silly publish   readme: 'clay-model-salesforce-api\n==============\n\nClay REST API Connector for Clay-Model\n\n\n# Install\nnpm install clay-model-salesforce-api\n\n# Overview\n\nClay-model-salesforce-api works in conjuntion with 3vot-salesforce-proxy, a proxy server that translates Salesforce REST into standard Rest API.\n\nYou may use the 3VOT Heroku Button to deploy this server, use in your NODE Server or deploy a server yourself. \n[![Deploy](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy)\n\nhttps://github.com/3vot/3vot-salesforce-proxy\n\n# Usage\n\nRegister this Connector with Clay-Model at initialization\n\n```\nvar Ajax = require("clay-model-salesforce-api");\n\nvar Model = require("clay-model");\nvar User = Model.configure("User", ["name", "email"])\nUser.ajax = Ajax;\n```\n\n# Docs\nRead Clay-Model docs for Model API\n\n## Query\nExecute a SOQL Query\n```\nUser.query( SOQL )\n\t.then( function(){\n\t\tvar users = User.all()\n\t})\n\t.fail( function(error){\n\t\t// Salesforces API Error Structure\n\t})\n```\n\n## CRUD\nUse Clay-Model regularly, behind the scenes it is sending all CRUD\'s to Salesforce.com via Visualforce Remoting\n\n```\nvar user = User.create({name: "rob"})\nuser.save();\nuser.destroy();\n\nOnly important feature to note, if you don\'t want to send changes to the servers, use { ignoreAjax: true }\n\n```\nvar user = User.create({name: "rob"}, {ignoreAjax: true})\nuser.save({ ignoreAjax: true });\nuser.destroy({ignoreAjax});\n```\n\n## APEX\nClay-Model let\'s you make Apex Rest Calls\n\n```\nvar Ajax = require("clay-model-salesforce-api");\nAjax.apex( "post", "postMethod", { id: 1, name: "value", other: false }  )\n.then( ... )\n.fail( ... )\n\nFor get requests with query strings, attach the string to the postMethod as in getMethod?query=yes&other=true\n\nRemember http rest method is delete.\n',
+70 silly publish   _id: 'clay-model-salesforce-api@0.0.11',
+70 silly publish   dist: { shasum: '358cea1c1972d8f724b127189e3510e739a856b9' },
+70 silly publish   _from: '.' }
+71 error need auth auth and email required for publishing
+71 error need auth You need to authorize this machine using `npm adduser`
+72 error System Darwin 14.0.0
+73 error command "/Users/roberto/.nvm/v0.10.21/bin/node" "/Users/roberto/.nvm/v0.10.21/bin/npm" "publish"
+74 error cwd /Users/roberto/proyectos/clay/clay-model-salesforce-api
+75 error node -v v0.10.21
+76 error npm -v 1.3.11
+77 error code ENEEDAUTH
+78 verbose exit [ 1, true ]
