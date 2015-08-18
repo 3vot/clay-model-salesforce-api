@@ -22,6 +22,12 @@ Ajax.Request = Request;
 Ajax.host = "";
 Ajax.login_server = "login.salesforce.com"
 
+Ajax.logout = function(redirectUrl){
+  var deferred = Q.defer();
+  var url =Ajax.host.replace("/api","")
+  window.location =  url + "/logout?redirect=" + redirectUrl
+}
+
 Ajax.apex = function(method, name, params){
   
   var deferred = Q.defer();
