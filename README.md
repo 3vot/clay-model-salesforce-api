@@ -13,13 +13,13 @@ Clay-model-salesforce-api works in conjuntion with clay-model in order to intera
 
 Being able to work with models in a straightforward way, makes it posible to build large Enterprise Apps.
 
-It's being used in production in the companies where @rodriguezartav is a consultant and in several Salesforce AppExchange Packages ( that are listed and passed security review ).
+Clay it's being used in production in the companies where @rodriguezartav is a consultant and in several Salesforce AppExchange Packages ( that are listed and passed security review ).
 
 # How it works
 
-We login to Salesforce by using oAuth Login. First open a popup window where the user will login into Salesforce - then register the access token. The popup points to Salesforce oAuth, then it's connected app setting using the Client_ID redirects back to our apps URL ( still on the Popup ) - which comunicates with our app and then closes itself. 
+We login to Salesforce by using oAuth Login. First open a popup window where the user will login into Salesforce - then register the access token. The popup points to Salesforce oAuth, then it's connected app settings redirects back to our apps URL ( still on the Popup ) - finally the popup comunicates with our main app window to complete login.
 
-The App handles both the main operation and popup operation. Popup operation works when it's being redirected from Salesforce.com. So the app must know it's being called in popup up mode. This module has all that's required for this to work.
+The App handles both the main app and popup. Popup operation works when it's being redirected from Salesforce.com. So the app must know it's being called in popup up mode. This module has all that's required for this to work.
 
 Once our app has the access token, it can exchange data with Salesforce.com. 
 
@@ -27,23 +27,25 @@ Why so complicated? So we can work offline and use localstorage. User Experience
 
 # Pre-Setup
 
-1. Configure CORS in Saleforce.
+1. Configure Remote Access in Saleforce.
 
-2. Setup your local development enviroment so that it works over https in development.
+2. Configure CORS in Saleforce.
+
+3. Setup your local development enviroment so that it works over https in development. Se /example for demo
 
 
 # Setup
 
-Listen for Salesforce Callback
-We must register to listen for the Salesforce oAuth redirect, when our app is operating as the popup being redirected from Salesforce oAuth Login. 
+## Listen for Salesforce Callback
+We must register to listen for the Salesforce oAuth redirect, when our app is operating as the popup being redirected from Salesforce oAuth Login. Even if this step should be listed after we open the popup, we put it here because it's need to be first on the app init code.
 
 ```
 Salesforce.listerForSalesforceCallback( callback );
 
-This is an syncronous function and should be place first in your code. If the callback returns true, then it's a popup and the app should not continue. It will notify the real app, where the callback returns false and close itself.
+This is a syncronous function and should be place first in your code. If the callback returns true, then it's a popup and the app should not continue. It will notify the real app, where the callback returns false and close itself.
 
-```
-First Register keys:
+
+## Register Salesforce Connected App Keys:
 
 ```
 var Salesforce = require("clay-model-salesforce-api");
@@ -51,7 +53,7 @@ Salesforce.registerKeys(lOGIN_SERVER, CLIENT_ID, REDIRECT_URL);
 
 ```
 
-Next Login
+## Login
 Note: If login is not executed from a click handler, popup may be blocked.
 
 This will open a salesforce oauth login window popup and call the callback function once it's complete.
@@ -66,7 +68,7 @@ function callback( err, token){
 }
 ```
 
-Register Oauth Token
+## Register Oauth Token
 Register the aouth Token, this gives you a change to store in localstorage and then use it after page refresh by calling this function on app initialization.
 
 ```
@@ -133,5 +135,7 @@ Salesforce APEX REST API does not have CORS, so you must use a proxy server.
 ## Under the hood
 
 We are using jsforce. The connection object it's exposed as Salesforce.conn so you may use any of jsforce methods as well.
+
+`Salesforce.conn.Batch....`
 
 

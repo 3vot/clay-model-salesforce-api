@@ -1,0 +1,23 @@
+{
+  "name": "demoapp",
+  "version": "0.0.0",
+  "description": "",
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  
+  "devDependencies": {
+    "browser-sync": "^2.9.1",
+    "browserify": "^5.10.1",
+    "browserify-shim": "~3.7.0",
+    "clay-model": "0.0.9",
+    "gulp": "^3.8.7",
+    "require-dir": "^0.1.0",
+    "vinyl-source-stream": "^1.1.0",
+    "gulp-notify": "^2.2.0",
+    "gulp-util": "^3.0.6",
+    "pretty-hrtime": "^1.0.0",
+    "watchify": "^3.4.0"
+  }
+}
