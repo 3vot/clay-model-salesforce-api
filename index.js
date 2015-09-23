@@ -24,7 +24,6 @@ var Ajax = function(eventName, model, options){
 
 }
 
-Ajax.Request = Request;
 
 Ajax.listerForSalesforceCallback = function( callback ){
   if( window && window.location.hash.indexOf("access_token") > -1 ){
@@ -34,10 +33,11 @@ Ajax.listerForSalesforceCallback = function( callback ){
   else callback(true);
 }
 
-Ajax.registerKeys = function(loginServer, clientId, redirectUrl){
+Ajax.registerKeys = function(loginServer, clientId, redirectUrl, proxyUrl){
   Ajax.LOGIN_SERVER = loginServer
   Ajax.CLIENT_ID = clientId
   Ajax.REDIRECT_URL = redirectUrl
+  Ajax.proxyUrl = proxyUrl
 }
 
 Ajax.openLoginWindow = function(callback){
@@ -121,8 +121,10 @@ Ajax.apex = function(method, name, params){
   var conn = new jsforce.Connection({
     instanceUrl : Ajax.conn.instanceUrl,
     accessToken : Ajax.conn.accessToken,
-    proxyUrl: process.env.PROXY_URL
+    proxyUrl: Ajax.proxyUrl
   });
+
+
 
   conn.apex[method]("/"+ name +"/", params, function(err, res) {
     if( !navigator.onLine || window.simulateOffline ) return deferred.reject( { errorCode: 'NO_INTERNET' } )
@@ -153,63 +155,15 @@ Ajax.query = function(params, options){
   return deferred.promise;
 }
 
-Ajax.push = function(options){
-  var _this = this;
-  var url =Ajax.host.replace("/api","")
-  var deferred = Q.defer();
-
-  if(options.channel) channel = this.className + "_" + options.channel;
-  else options.channel = this.className
-
-  options.socket_id = Ajax.pusher.connection.socket_id;
-
-  Ajax.Request.get( url + "/pusher" )
-  .withCredentials()
-  .query( options )
-  .query("login_server=" +Ajax.login_server)
-  .end( function( err, res ){ 
-    if( !navigator.onLine || window.simulateOffline ) return deferred.reject( { errorCode: 'NO_INTERNET' } )
-    if(err) deferred.reject(err);
-    if(res.status >= 400) return deferred.reject( res.body );
-    deferred.resolve(res);
-  })
-  
-  return deferred.promise;
-}
-
-Ajax.pull = function(options){
-  var _this = this;
-  if( !Ajax.pusher ) throw "Remember to register. Ajax.pusher = var pusher = new Pusher('KEY');"
-  var channel = Ajax.pusher.subscribe( this.className );
-  if(options.channel) channel += "_" + options.channel;
-
-  channel.bind( options.eventName, function(data) {
-    
-    _this.trigger(options.eventName, JSON.parse( data.message ) );
-  });
-}
-
-Ajax.realtime = function(){
-  Ajax.realtime = true;
-
-  this.pull( { eventName: "create" } )
-  this.pull( { eventName: "update" } )
-  this.pull( { eventName: "destroy" } )
-}
-
 Ajax.get = function(id, options){
   var _this = this;
   var deferred = Q.defer();
 
-  Ajax.Request.get( Ajax.generateURL(this) + "/" + id )
-  .query("login_server=" +Ajax.login_server)
-  .end( function( err, res ){ 
-    if( !navigator.onLine || window.simulateOffline ) return deferred.reject( { errorCode: 'NO_INTERNET' } )
-    if(err) return deferred.reject( err );
-    if(res.status >= 400) return deferred.reject( res.body );
-    res.id = res.Id;
-    Ajax.handleResultWithPromise.call(_this, err, res.body, false, deferred  );
-  })
+  Ajax.conn.sobject(this.className).retrieve(id, function(err, result) {
+    if (err) { return console.error(err); }
+    Ajax.handleResultWithPromise( _this, err, result, false, deferred );
+    // ...
+  });
 
   return deferred.promise;
 }
@@ -223,7 +177,7 @@ Ajax.post = function(model, options){
   this.id = null;
 
   Ajax.conn.sobject(model.className).create( this.attributes(), function(err, ret) {
-    if (err || !ret.success || ret.errors) { return res.reject(err) }
+    if (err || !ret.success || ret.errors) { return deferred.reject(err) }
     _this.id = ret.Id;
     _this.changeID(ret.Id);
     _this.Id = ret.Id;
@@ -263,32 +217,15 @@ Ajax.del = function(model, options){
   var _this = this;
   var deferred = Q.defer();
 
-  Ajax.Request.put( Ajax.generateURL(model, this.id ) )
-  .query("login_server=" +Ajax.login_server)
-  .withCredentials()
-  .end( function( err, res ){ 
-    if( !navigator.onLine || window.simulateOffline ) return deferred.reject( { errorCode: 'NO_INTERNET' } )
-    if(err) return deferred.reject( err );
-    if(res.status >= 400) return deferred.reject( res.body );
-    Ajax.handleResultWithPromise.call(_this, err, res.body, true, deferred  )
+  Ajax.conn.sobject(model.className).destroy(this.id, function(err, ret) {
+    if (err || !ret.success) deferred.reject(err);
+    Ajax.handleResultWithPromise.call(_this, err, ret, true, deferred  )
   });
 
   return deferred.promise;  
 }
 
-Ajax.generateURL = function() {
-  var args, collection, object, path, scope;
-  object = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
-  collection = object.className;
-  
-  args.unshift(collection);
-  args.unshift(scope);
-  path = args.join('/');
-  path = path.replace(/(\/\/)/g, "/");
-  path = path.replace(/^\/|\/$/g, "");
-  
-  return  Ajax.host + "/"+path;
-};
+
 
 Ajax.handleResultWithPromise = function(err, result, nullok, deferred) {
   if (result) {

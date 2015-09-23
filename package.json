@@ -20,8 +20,8 @@
     "querystring": "^0.2.0"
   },
   "devDependencies": {
-    "tape": "~2.4.0",
-    "clay-model": "0.0.9"
+    "clay-model": "0.0.9",
+    "tape": "~2.4.0"
   },
   "readmeFilename": "README.md",
   "bugs": {
