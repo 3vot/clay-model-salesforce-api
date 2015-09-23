@@ -1,6 +1,6 @@
 {
   "name": "clay-model-salesforce-api",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Clay Model Connector for Salesforce API, using 3VOT Salesforce Proxy",
   "main": "index.js",
   "scripts": {
