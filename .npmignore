@@ -3,3 +3,5 @@ test
 .travis.yml
 .env
 .dev
+./examples
+examples
