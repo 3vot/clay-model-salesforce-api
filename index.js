@@ -1,10 +1,17 @@
 var Q = require("kew");
-var Request = require("superagent")
-//var Qs = require('qs');
-//var QueryString = require("querystring");
+var jsforce = require("jsforce");
+var qs = require('querystring');
 
 
 var Ajax = function(eventName, model, options){
+  if( !navigator.onLine || window.simulateOffline ){
+    return Ajax.networkError.call(this,"internet");
+  }
+
+  if( !Ajax.conn){
+    return Ajax.networkError.call(this, "login");
+  }
+
   if(eventName == "create") return Ajax.post.call(this, model,options )
   else if(eventName == "update") return Ajax.put.call(this, model,options )
   else if(eventName == "destroy") return Ajax.del.call(this, model,options )
@@ -19,78 +26,130 @@ var Ajax = function(eventName, model, options){
 
 Ajax.Request = Request;
 
-Ajax.host = "";
-Ajax.login_server = "login.salesforce.com"
+Ajax.listerForSalesforceCallback = function( callback ){
+  if( window && window.location.hash.indexOf("access_token") > -1 ){
+    window.opener.postMessage( window.location.hash.replace("#",""), "*" );
+    callback(false)
+  } 
+  else callback(true);
+}
 
-Ajax.logout = function(redirectUrl){
-  var deferred = Q.defer();
-  var url =Ajax.host.replace("/api","")
-  window.location =  url + "/logout?redirect=" + redirectUrl
+Ajax.registerKeys = function(loginServer, clientId, redirectUrl){
+  Ajax.LOGIN_SERVER = loginServer
+  Ajax.CLIENT_ID = clientId
+  Ajax.REDIRECT_URL = redirectUrl
+}
+
+Ajax.openLoginWindow = function(callback){
+  var url =  Ajax.LOGIN_SERVER +  "/services/oauth2/authorize?response_type=token&client_id="+ Ajax.CLIENT_ID+"&redirect_uri=" + Ajax.REDIRECT_URL
+  
+  Ajax.loginCallback = callback;
+  window.addEventListener("message", Ajax.onLoginCallback, false);
+  var w = 300;
+  var h = 480;
+  var left = (screen.width/2)-(w/2); 
+  var top = (screen.height/2)-(h/2);
+  window.pw = window.open(url, null, 'location=yes,toolbar=no,status=no,menubar=no,width='+w+',height='+h+',top='+top+',left='+left);
+  try {
+    window.pw.focus();
+  }
+  catch (e) {
+    Ajax.loginCallback(e);
+    Ajax.loginCallback =null;
+    window.pw=null;
+  }
+}
+
+ Ajax.onLoginCallback = function(event){
+  if( !event || !event.data || !event.data.indexOf || event.data.indexOf("access_token") == -1 ) return false;
+  
+  window.removeEventListener("message", Ajax.onLoginCallback, false);
+  
+  var token = qs.parse( event.data );
+
+  if( token ){ 
+    Ajax.registerToken(token);
+    if( Ajax.loginCallback ){
+      Ajax.loginCallback(null, token);
+      Ajax.loginCallback = null;
+    }
+  }
+  if( window.pw ){
+    window.pw.close();
+    window.pw=null;
+  }
+  
+}
+
+Ajax.registerToken = function(token){
+  Ajax.token = token;
+  Ajax.host = token.instance_url;
+  Ajax.access_token = token.access_token;
+
+  Ajax.conn = new jsforce.Connection({
+    instanceUrl : token.instance_url,
+    accessToken : token.access_token
+  });
+}
+
+Ajax.logout = function(){
+  Ajax.conn = null;
+}
+
+Ajax.networkError = function(){
+  var deferred = Q.defer(); 
+
+  setTimeout( function(){
+    deferred.reject( { errorCode: 'NO_INTERNET' } )
+  },1000)
+
+  return deferred.promise;
 }
 
 Ajax.apex = function(method, name, params){
   
-  var deferred = Q.defer();
+  if( !navigator.onLine || window.simulateOffline ){
+    return Ajax.networkError.call(this,"internet");
+  }
 
-  Ajax.Request[method]( Ajax.host + "/apex/" + name  )
-  .query("login_server=" +Ajax.login_server)
-  .send(params)
-  .withCredentials()
-  .end( function( err, res ){ 
-    if( !navigator.onLine || window.simulateOffline ) return deferred.reject("NO_INTERNET")
+  if( !Ajax.conn){
+    return Ajax.networkError.call(this, "login");
+  }
+
+  var deferred = Q.defer(); 
+  
+  var conn = new jsforce.Connection({
+    instanceUrl : Ajax.conn.instanceUrl,
+    accessToken : Ajax.conn.accessToken,
+    proxyUrl: process.env.PROXY_URL
+  });
+
+  conn.apex[method]("/"+ name +"/", params, function(err, res) {
+    if( !navigator.onLine || window.simulateOffline ) return deferred.reject( { errorCode: 'NO_INTERNET' } )
     if( err ) return deferred.reject( err );
+
     deferred.resolve( res )
   });
-  return deferred.promise;
-}
 
+  return deferred.promise;
+
+}
 
 Ajax.query = function(params, options){
-var _this = this;
-  //var pctEncodeSpaces = true;
-//  var params = encodeURIComponent(params).replace(/%40/gi, '@').replace(/%3A/gi, ':').replace(/%24/g, '$').replace(/%2C/gi, ',').replace(/%20/g, pctEncodeSpaces ? '%20' : '+');
-  
-  var deferred = Q.defer();
-  
-
-  Ajax.Request.get( Ajax.generateURL(this) )
-  .query( "query=" + params )
-  .query( options )
-  .query("login_server=" +Ajax.login_server)
-  .withCredentials()
-  .end( function( err, res ){
-    if( !navigator.onLine || window.simulateOffline ) return deferred.reject("NO_INTERNET")
-    if( err ) return deferred.reject( err );
-    if(res.status >= 400) return deferred.reject( res.body );
-
-    for (var i = res.body.length - 1; i >= 0; i--) {
-      var item = res.body[i];
-      item.id = item.Id;
-    };
-    
-    deferred.resolve( res.body )
-  });
-  return deferred.promise;
-
-}
-
-Ajax.login = function(options){
-  if(!options) options = {};
   var _this = this;
-  var url =Ajax.host.replace("/api","")
   var deferred = Q.defer();
-
-  Ajax.Request.get( url + "/login/whoami")
-  .withCredentials()
-  .query( options )
-  .query("login_server=" +Ajax.login_server)
-  .end( function( err, res ){ 
-    if( !navigator.onLine || window.simulateOffline ) return deferred.reject("NO_INTERNET")
-    if( err || res.status != 200 ) return window.location = url + "/login?app_url=" + window.location.href + "&login_server=" + Ajax.login_server ;
-    Ajax.user = res.body;
-    deferred.resolve();
-  })
   
+  var records = [];
+  Ajax.conn.query(params)
+  .on("record", function(record) {
+    records.push(record);
+  })
+  .on("end", function(query) { return deferred.resolve( records ); })
+  .on("error", function(err) {
+    return deferred.reject( err );
+  })
+  .run( options );
+
   return deferred.promise;
 }
 
@@ -109,7 +168,7 @@ Ajax.push = function(options){
   .query( options )
   .query("login_server=" +Ajax.login_server)
   .end( function( err, res ){ 
-    if( !navigator.onLine || window.simulateOffline ) return deferred.reject("NO_INTERNET")
+    if( !navigator.onLine || window.simulateOffline ) return deferred.reject( { errorCode: 'NO_INTERNET' } )
     if(err) deferred.reject(err);
     if(res.status >= 400) return deferred.reject( res.body );
     deferred.resolve(res);
@@ -145,7 +204,7 @@ Ajax.get = function(id, options){
   Ajax.Request.get( Ajax.generateURL(this) + "/" + id )
   .query("login_server=" +Ajax.login_server)
   .end( function( err, res ){ 
-    if( !navigator.onLine || window.simulateOffline ) return deferred.reject("NO_INTERNET")
+    if( !navigator.onLine || window.simulateOffline ) return deferred.reject( { errorCode: 'NO_INTERNET' } )
     if(err) return deferred.reject( err );
     if(res.status >= 400) return deferred.reject( res.body );
     res.id = res.Id;
@@ -163,20 +222,13 @@ Ajax.post = function(model, options){
   var id = this.id;
   this.id = null;
 
-  Ajax.Request.post( Ajax.generateURL(model) )
-  .query("login_server=" +Ajax.login_server)
-  .send( this.toJSON() )
-  .withCredentials()
-  .end( function( err, res ){ 
-    if( !navigator.onLine || window.simulateOffline ) return deferred.reject("NO_INTERNET")
-    if(err){ _this.id = id; return deferred.reject( err ); }
-    if(res.status >= 400){ _this.id = id; return deferred.reject( res.body ); }
-    
-    _this.id = res.body.Id;
-    _this.changeID(res.body.Id);
-    _this.Id = res.body.Id;
-    if(res.status >= 400) return deferred.reject( res.body );
-    Ajax.handleResultWithPromise.call(_this, err, res.body, false, deferred  )
+  Ajax.conn.sobject(model.className).create( this.attributes(), function(err, ret) {
+    if (err || !ret.success || ret.errors) { return res.reject(err) }
+    _this.id = ret.Id;
+    _this.changeID(ret.Id);
+    _this.Id = ret.Id;
+    Ajax.handleResultWithPromise.call(_this, err, ret, false, deferred  )
+  
   });
 
   return deferred.promise;  
@@ -190,23 +242,19 @@ Ajax.put = function(model, options){
   var previousAttributes = JSON.parse( model.previousAttributes[this.id] );
   for(key in valuesToSend){
     if( this.constructor.ignoreFields && this.constructor.ignoreFields.indexOf(key) > -1 ) delete valuesToSend[key];
-
-    
     else if(valuesToSend[key] == previousAttributes[key]){
       delete valuesToSend[key];
     }
   }
 
-  Ajax.Request.put( Ajax.generateURL(model, this.id ) )
-  .query("login_server=" +Ajax.login_server)
-  .send( valuesToSend )
-  .withCredentials()
-  .end( function( err, res ){ 
-    if( !navigator.onLine || window.simulateOffline ) return deferred.reject("NO_INTERNET")
-    if(err) return deferred.reject( err );
-    if(res.status >= 400) return deferred.reject( res.body );
-    Ajax.handleResultWithPromise.call(_this, err, res.body, true, deferred  )
-  });
+  valuesToSend.Id = this.id;
+
+  Ajax.conn.sobject(this.constructor.className).update( valuesToSend, function(err,ret){
+    if( !navigator.onLine || window.simulateOffline ) return deferred.reject( { errorCode: 'NO_INTERNET' } )
+    if( err ) return deferred.reject( err );
+    if( !ret.success ) return deferred.reject( ret );
+    Ajax.handleResultWithPromise.call(_this, err, ret, true, deferred  )
+  })
 
   return deferred.promise;  
 }
@@ -219,7 +267,7 @@ Ajax.del = function(model, options){
   .query("login_server=" +Ajax.login_server)
   .withCredentials()
   .end( function( err, res ){ 
-    if( !navigator.onLine || window.simulateOffline ) return deferred.reject("NO_INTERNET")
+    if( !navigator.onLine || window.simulateOffline ) return deferred.reject( { errorCode: 'NO_INTERNET' } )
     if(err) return deferred.reject( err );
     if(res.status >= 400) return deferred.reject( res.body );
     Ajax.handleResultWithPromise.call(_this, err, res.body, true, deferred  )
@@ -256,10 +304,13 @@ Ajax.handleResultWithPromise = function(err, result, nullok, deferred) {
     return deferred.resolve(this);
   } else {
     deferred.reject({
-      message: 'Null returned by RemoteAction not called with nullOk flag',
-      errorCode: 'NULL_RETURN'
+      errorCode: 'NULL_RETURNED'
     });
   }
 }
+
+
+
+
 
 module.exports = Ajax;
