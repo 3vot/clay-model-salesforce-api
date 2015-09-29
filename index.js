@@ -4,12 +4,13 @@ var qs = require('querystring');
 
 
 var Ajax = function(eventName, model, options){
-  if( !navigator.onLine || window.simulateOffline ){
-    return Ajax.networkError.call(this,"internet");
+
+  if( !navigator.onLine || window.simulateOffline || window.isOnline == false ){
+    return Ajax.networkError.call(this,"NO_INTERNET");
   }
 
   if( !Ajax.conn){
-    return Ajax.networkError.call(this, "login");
+    return Ajax.networkError.call(this, "NO_LOGIN");
   }
 
   if(eventName == "create") return Ajax.post.call(this, model,options )
@@ -24,6 +25,15 @@ var Ajax = function(eventName, model, options){
 
 }
 
+Ajax.networkError = function(code){
+  var deferred = Q.defer(); 
+
+  setTimeout( function(){
+    deferred.reject( { errorCode: code } )
+  },500)
+
+  return deferred.promise;
+}
 
 Ajax.listerForSalesforceCallback = function( callback ){
   if( window && window.location.hash.indexOf("access_token") > -1 ){
@@ -45,8 +55,8 @@ Ajax.openLoginWindow = function(callback){
   
   Ajax.loginCallback = callback;
   window.addEventListener("message", Ajax.onLoginCallback, false);
-  var w = 300;
-  var h = 480;
+  var w = 340;
+  var h = 600;
   var left = (screen.width/2)-(w/2); 
   var top = (screen.height/2)-(h/2);
   window.pw = window.open(url, null, 'location=yes,toolbar=no,status=no,menubar=no,width='+w+',height='+h+',top='+top+',left='+left);
@@ -96,24 +106,16 @@ Ajax.logout = function(){
   Ajax.conn = null;
 }
 
-Ajax.networkError = function(){
-  var deferred = Q.defer(); 
 
-  setTimeout( function(){
-    deferred.reject( { errorCode: 'NO_INTERNET' } )
-  },1000)
-
-  return deferred.promise;
-}
 
 Ajax.apex = function(method, name, params){
   
   if( !navigator.onLine || window.simulateOffline ){
-    return Ajax.networkError.call(this,"internet");
+    return Ajax.networkError.call(this,"NO_INTERNET");
   }
 
   if( !Ajax.conn){
-    return Ajax.networkError.call(this, "login");
+    return Ajax.networkError.call(this, "NO_LOGIN");
   }
 
   var deferred = Q.defer(); 
@@ -124,10 +126,8 @@ Ajax.apex = function(method, name, params){
     proxyUrl: Ajax.proxyUrl
   });
 
-
-
   conn.apex[method]("/"+ name +"/", params, function(err, res) {
-    if( !navigator.onLine || window.simulateOffline ) return deferred.reject( { errorCode: 'NO_INTERNET' } )
+    if( err && err.errorCode == "ERROR_HTTP_400" ) return deferred.reject( { errorCode: 'SESSION_EXPIRED' } )
     if( err ) return deferred.reject( err );
 
     deferred.resolve( res )
@@ -148,6 +148,7 @@ Ajax.query = function(params, options){
   })
   .on("end", function(query) { return deferred.resolve( records ); })
   .on("error", function(err) {
+    if( err && err.errorCode == "ERROR_HTTP_400" ) return deferred.reject( { errorCode: 'SESSION_EXPIRED' } )
     return deferred.reject( err );
   })
   .run( options );
@@ -228,6 +229,8 @@ Ajax.del = function(model, options){
 
 
 Ajax.handleResultWithPromise = function(err, result, nullok, deferred) {
+  if(err && err.errorCode == "ERROR_HTTP_400" ) return deferred.reject( { errorCode: 'SESSION_EXPIRED' } )
+
   if (result) {
     if (typeof result !== 'object') {
       result = JSON.parse(result);
