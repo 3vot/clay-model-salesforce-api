@@ -179,11 +179,10 @@ Ajax.post = function(model, options){
 
   Ajax.conn.sobject(model.className).create( this.attributes(), function(err, ret) {
     if (err || !ret.success ) { return deferred.reject(err) }
-    _this.id = ret.Id;
-    _this.changeID(ret.Id);
-    _this.Id = ret.Id;
+    _this.id = ret.id || ret.Id;
+    _this.changeID(ret.id || ret.Id);
+    _this.Id = ret.id || ret.Id;
     Ajax.handleResultWithPromise.call(_this, err, ret, false, deferred  )
-  
   });
 
   return deferred.promise;  
