@@ -178,7 +178,7 @@ Ajax.post = function(model, options){
   this.id = null;
 
   Ajax.conn.sobject(model.className).create( this.attributes(), function(err, ret) {
-    if (err || !ret.success || ret.errors) { return deferred.reject(err) }
+    if (err || !ret.success ) { return deferred.reject(err) }
     _this.id = ret.Id;
     _this.changeID(ret.Id);
     _this.Id = ret.Id;
