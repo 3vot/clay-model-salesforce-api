@@ -127,8 +127,14 @@ Ajax.apex = function(method, name, params){
   });
 
   conn.apex[method]("/"+ name +"/", params, function(err, res) {
-    if( err && err.errorCode == "ERROR_HTTP_400" ) return deferred.reject( { errorCode: 'SESSION_EXPIRED' } )
-    if( err ) return deferred.reject( err );
+    if( err && err.errorCode == "ERROR_HTTP_400" ){
+      if(Ajax.onError) Ajax.onError( "Ajax Error", "Session Expired" );
+      return deferred.reject( { errorCode: 'SESSION_EXPIRED' } )
+    }
+    if( err ){
+      if(Ajax.onError) Ajax.onError( "Ajax Error",err );
+      return deferred.reject( err );
+    }
 
     deferred.resolve( res )
   });
@@ -146,10 +152,18 @@ Ajax.query = function(params, options){
   .on("record", function(record) {
     records.push(record);
   })
-  .on("end", function(query) { return deferred.resolve( records ); })
+  .on("end", function(query) { 
+    return deferred.resolve( records ); 
+  })
   .on("error", function(err) {
-    if( err && err.errorCode == "ERROR_HTTP_400" ) return deferred.reject( { errorCode: 'SESSION_EXPIRED' } )
-    return deferred.reject( err );
+    if( err && err.errorCode == "ERROR_HTTP_400" ){
+      if(Ajax.onError) Ajax.onError( "Session Expired" );
+      return deferred.reject( { errorCode: 'SESSION_EXPIRED' } )
+    }
+    else{
+      if(Ajax.onError) Ajax.onError( "Ajax Error",err );
+      return deferred.reject( err );
+    }
   })
   .run( options );
 
@@ -161,9 +175,7 @@ Ajax.get = function(id, options){
   var deferred = Q.defer();
 
   Ajax.conn.sobject(this.className).retrieve(id, function(err, result) {
-    if (err) { return console.error(err); }
     Ajax.handleResultWithPromise( _this, err, result, false, deferred );
-    // ...
   });
 
   return deferred.promise;
@@ -178,7 +190,14 @@ Ajax.post = function(model, options){
   this.id = null;
 
   Ajax.conn.sobject(model.className).create( this.attributes(), function(err, ret) {
-    if (err || !ret.success ) { return deferred.reject(err) }
+    if(err){
+      if(Ajax.onError) Ajax.onError( "Ajax Error",err );
+      return deferred.reject(err);
+    }
+    if (!ret.success ) { 
+      if(Ajax.onError) Ajax.onError( "Ajax Error",ret );
+      return deferred.reject(ret) 
+    }
     _this.id = ret.id || ret.Id;
     _this.changeID(ret.id || ret.Id);
     _this.Id = ret.id || ret.Id;
@@ -204,9 +223,6 @@ Ajax.put = function(model, options){
   valuesToSend.Id = this.id;
 
   Ajax.conn.sobject(this.constructor.className).update( valuesToSend, function(err,ret){
-    if( !navigator.onLine || window.simulateOffline ) return deferred.reject( { errorCode: 'NO_INTERNET' } )
-    if( err ) return deferred.reject( err );
-    if( !ret.success ) return deferred.reject( ret );
     Ajax.handleResultWithPromise.call(_this, err, ret, true, deferred  )
   })
 
@@ -218,7 +234,6 @@ Ajax.del = function(model, options){
   var deferred = Q.defer();
 
   Ajax.conn.sobject(model.className).destroy(this.id, function(err, ret) {
-    if (err || !ret.success) deferred.reject(err);
     Ajax.handleResultWithPromise.call(_this, err, ret, true, deferred  )
   });
 
@@ -228,20 +243,38 @@ Ajax.del = function(model, options){
 
 
 Ajax.handleResultWithPromise = function(err, result, nullok, deferred) {
-  if(err && err.errorCode == "ERROR_HTTP_400" ) return deferred.reject( { errorCode: 'SESSION_EXPIRED' } )
+  if(err && err.errorCode == "ERROR_HTTP_400" ){
+    if(Ajax.onError) Ajax.onError("Ajax Error", "Session was expired" );
+    return deferred.reject( { errorCode: 'SESSION_EXPIRED' } )
+  }
+
+  if(err){
+    if(Ajax.onError) Ajax.onError( "Ajax Error",err );
+    return deferred.reject(err);
+  }
+
+  if(!result.success){
+    if(Ajax.onError) Ajax.onError( "Ajax Error",result );
+    return deferred.reject(result);
+  }
 
   if (result) {
     if (typeof result !== 'object') {
       result = JSON.parse(result);
     }
+    
     if (Array.isArray(result) && result.length > 0 && result[0].message && result[0].errorCode) {
+      if(Ajax.onError) Ajax.onError( "Ajax Error",err );
       return deferred.reject(result);
-    } else {      
+    } 
+    else {      
       return deferred.resolve(this);
     }
+
   } else if (typeof nullok !== 'undefined' && nullok) {
     return deferred.resolve(this);
   } else {
+    if(Ajax.onError) Ajax.onError( "Ajax Error",new Error( "Null returned when it was not allowed" ) );
     deferred.reject({
       errorCode: 'NULL_RETURNED'
     });
